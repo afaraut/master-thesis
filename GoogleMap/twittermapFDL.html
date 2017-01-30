@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <title>Map Twitter</title>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser.js"></script>
+    <style>
+
+        html, body, #content {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .map-canvas {
+            height: 100%;
+            width : 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+    </style>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script src="FDLTweets.js"></script>
+    <script type="text/babel">
+
+    var prev_infowindow = false; 
+
+    var TwitterGoogleMap = React.createClass({  
+        getDefaultProps: function () {
+            return {
+                initialZoom: 13,
+            };
+        },
+        componentDidMount: function () {
+            var _this = this;
+            var mapOptions = {
+                center: new google.maps.LatLng(45.74140401, 4.81741286),
+                zoom: this.props.initialZoom
+            },
+            map = new google.maps.Map(ReactDOM.findDOMNode(this), mapOptions);
+
+            mapse.points.map(function (point) { 
+                _this.createMarker(map, point);
+            });
+
+            this.setState({map: map});
+                        console.log("ok");
+        },  
+
+        createMarker: function(map, point) {
+            var _this = this;
+            var geo = point.geo;
+
+            var marker = new google.maps.Marker({position: new google.maps.LatLng(geo.latitude, geo.longitude), title: "(" + geo.latitude + ", " + geo.longitude + ") ", map: map, icon:'pointFDL.png'});
+            google.maps.event.addListener(marker, 'click', function() {
+                var div = document.createElement('div');
+                ReactDOM.render(_this.renderInfoWindow(point.text), div );
+                var infowindow = new google.maps.InfoWindow();
+                infowindow.setContent( div );
+
+                if( prev_infowindow ) {
+                   prev_infowindow.close();
+                }
+                prev_infowindow = infowindow;
+
+                infowindow.open(map, this);
+            });
+
+        },
+        renderInfoWindow: function(content) {
+            return (
+                <div> {content} !</div>
+            );
+        },  
+        render: function () {
+            return (
+                <div className='map-canvas'></div>
+            );
+        }
+    });
+
+    ReactDOM.render(
+        <TwitterGoogleMap />,
+        document.getElementById('content')
+    );
+
+    </script>
+  </body>
+</html>
